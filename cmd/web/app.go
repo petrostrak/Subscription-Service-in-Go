@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/alexedwards/scs/redisstore"
@@ -18,16 +19,27 @@ import (
 func StartApp() {
 	// connect to DB
 	db := initDB()
-	db.Ping()
 
 	// create sessions
 	session := initSession()
 
+	// create logges
+	infoLog := log.New(os.Stdout, "[INFO]\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stdout, "[ERROR]\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// create channels
 
 	// create waitGroup
+	wg := sync.WaitGroup{}
 
 	// setup the app config
+	app := Config{
+		Session:  session,
+		DB:       db,
+		InfoLog:  infoLog,
+		ErrorLog: errorLog,
+		Wait:     &wg,
+	}
 
 	// setup mail
 
