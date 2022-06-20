@@ -50,13 +50,13 @@ func connectToDB() *sql.DB {
 			return connection
 		}
 
-		counts++
-
 		if counts > 10 {
 			return nil
 		}
 
 		log.Println("Backing off for a moment")
+		counts++
+		continue
 	}
 }
 
