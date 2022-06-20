@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,10 @@ import (
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
+)
+
+const (
+	webPort = "80"
 )
 
 func StartApp() {
@@ -44,6 +49,20 @@ func StartApp() {
 	// setup mail
 
 	// listen for web connections
+	app.serve()
+}
+
+func (app *Config) serve() {
+	// start http server
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.Routes(),
+	}
+
+	app.InfoLog.Println("Starting web server...")
+	if err := srv.ListenAndServe(); err != nil {
+		log.Panic(err)
+	}
 }
 
 func initDB() *sql.DB {
