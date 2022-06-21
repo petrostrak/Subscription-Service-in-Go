@@ -13,6 +13,7 @@ func (app *Config) Routes() http.Handler {
 
 	// setup middleware
 	mux.Use(middleware.Recoverer)
+	mux.Use(app.SessionLoad)
 
 	// define application routes
 	mux.Get("/", app.HomePage)
