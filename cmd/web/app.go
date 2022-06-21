@@ -65,6 +65,7 @@ func (app *Config) serve() {
 	}
 }
 
+// initDB connects to Postgres and returns a pool of connections
 func initDB() *sql.DB {
 	conn := connectToDB()
 	if conn == nil {
@@ -74,16 +75,19 @@ func initDB() *sql.DB {
 	return conn
 }
 
+// connectToDB tries to connect to postgres, and backs off until a connection
+// is made, or we have not connected after 10 tries
 func connectToDB() *sql.DB {
 	counts := 0
 
 	dsn := os.Getenv("DSN")
+
 	for {
 		connection, err := openDB(dsn)
 		if err != nil {
-			log.Println("postgres not yet ready")
+			log.Println("postgres not yet ready...")
 		} else {
-			log.Println("connnected to DB")
+			log.Print("connected to database!")
 			return connection
 		}
 
@@ -91,12 +95,16 @@ func connectToDB() *sql.DB {
 			return nil
 		}
 
-		log.Println("Backing off for a moment")
+		log.Print("Backing off for 1 second")
+		time.Sleep(1 * time.Second)
 		counts++
+
 		continue
 	}
 }
 
+// openDB opens a connection to Postgres, using a DSN read
+// from the environment variable DSN
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -111,6 +119,7 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
+// initSession sets up a session, using Redis for session store
 func initSession() *scs.SessionManager {
 	// set up session
 	session := scs.New()
