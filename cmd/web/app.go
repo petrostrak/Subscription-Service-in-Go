@@ -17,6 +17,7 @@ import (
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/petrostrak/Subscription-Service-in-Go/data"
 )
 
 const (
@@ -46,6 +47,7 @@ func StartApp() {
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
 		Wait:     &wg,
+		Models:   data.New(db),
 	}
 
 	// setup mail
