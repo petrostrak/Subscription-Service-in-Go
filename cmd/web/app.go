@@ -87,7 +87,7 @@ func connectToDB() *sql.DB {
 		if err != nil {
 			log.Println("postgres not yet ready...")
 		} else {
-			log.Print("connected to database!")
+			log.Println("connected to database!")
 			return connection
 		}
 
@@ -95,7 +95,7 @@ func connectToDB() *sql.DB {
 			return nil
 		}
 
-		log.Print("Backing off for 1 second")
+		log.Println("Backing off for 1 second")
 		time.Sleep(1 * time.Second)
 		counts++
 
