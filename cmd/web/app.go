@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	webPort = "80"
+	webPort = "8080"
 )
 
 func StartApp() {
