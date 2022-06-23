@@ -89,7 +89,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 	// TODO - validate data
 
-	// create user
+	// create a user
 	u := data.User{
 		Email:     r.Form.Get("email"),
 		FirstName: r.Form.Get("first-name"),
@@ -103,18 +103,19 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable to create user.")
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		return
 	}
 
 	// send an activation email
-	url := fmt.Sprintf("http://localhost:8080/activate?email=%s", u.Email)
-	signedUrl := GenerateTokenFromString(url)
-	app.InfoLog.Println(signedUrl)
+	url := fmt.Sprintf("http://localhost/activate?email=%s", u.Email)
+	signedURL := GenerateTokenFromString(url)
+	app.InfoLog.Println(signedURL)
 
 	msg := Message{
 		To:       u.Email,
 		Subject:  "Activate your account",
 		Template: "confirmation-email",
-		Data:     template.HTML(signedUrl),
+		Data:     template.HTML(signedURL),
 	}
 
 	app.sendEmail(msg)
@@ -123,7 +124,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func (app *Config) ActivateAccout(w http.ResponseWriter, r *http.Request) {
+func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	// validate url
 	url := r.RequestURI
 	testURL := fmt.Sprintf("http://localhost%s", url)
@@ -135,7 +136,7 @@ func (app *Config) ActivateAccout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// activate accout
+	// activate account
 	u, err := app.Models.User.GetByEmail(r.URL.Query().Get("email"))
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "No user found.")
@@ -151,7 +152,7 @@ func (app *Config) ActivateAccout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.Session.Put(r.Context(), "flash", "Account activated. You can now login")
+	app.Session.Put(r.Context(), "flash", "Account activated. You can now log in.")
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 
 	// generate an invoice
