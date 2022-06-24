@@ -7,11 +7,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func (app *Config) Routes() http.Handler {
+func (app *Config) routes() http.Handler {
 	// create router
 	mux := chi.NewRouter()
 
-	// setup middleware
+	// set up middleware
 	mux.Use(middleware.Recoverer)
 	mux.Use(app.SessionLoad)
 
@@ -24,17 +24,18 @@ func (app *Config) Routes() http.Handler {
 	mux.Post("/register", app.PostRegisterPage)
 	mux.Get("/activate", app.ActivateAccount)
 
-	mux.Mount("/members", app.authRouther())
+	// mount secure routes as its own router
+	mux.Mount("/members", app.authRouter())
 
 	return mux
 }
 
-func (app *Config) authRouther() http.Handler {
+func (app *Config) authRouter() http.Handler {
 	mux := chi.NewRouter()
 	mux.Use(app.Auth)
 
 	mux.Get("/plans", app.ChooseSubscription)
-	mux.Get("/subscribe", app.SubscribeToPlan)
+	mux.Get("/subscribe", app.SubcribeToPlan)
 
 	return mux
 }

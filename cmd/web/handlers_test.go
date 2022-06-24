@@ -13,7 +13,6 @@ import (
 var pageTests = []struct {
 	name               string
 	url                string
-	method             string
 	expectedStatusCode int
 	handler            http.HandlerFunc
 	sessionData        map[string]any
@@ -22,60 +21,25 @@ var pageTests = []struct {
 	{
 		name:               "home",
 		url:                "/",
-		method:             "GET",
 		expectedStatusCode: http.StatusOK,
 		handler:            testApp.HomePage,
 	},
 	{
-		name:               "login",
+		name:               "login page",
 		url:                "/login",
-		method:             "GET",
-		expectedStatusCode: http.StatusOK,
-		handler:            testApp.LoginPage,
-	},
-	{
-		name:               "post login",
-		url:                "/login",
-		method:             "POST",
 		expectedStatusCode: http.StatusSeeOther,
-		handler:            testApp.PostLoginPage,
+		handler:            testApp.LoginPage,
+		expectedHTML:       `<h1 class="mt-5">Login</h1>`,
 	},
 	{
 		name:               "logout",
 		url:                "/logout",
-		method:             "GET",
-		expectedStatusCode: http.StatusSeeOther,
-		handler:            testApp.Logout,
-		sessionData: map[string]any{
-			"userID": 1,
-			"user":   data.User{},
-		},
-	},
-	{
-		name:               "plans (logged in)",
-		url:                "/plans",
-		method:             "GET",
 		expectedStatusCode: http.StatusOK,
-		handler:            testApp.ChooseSubscription,
+		handler:            testApp.LoginPage,
 		sessionData: map[string]any{
 			"userID": 1,
 			"user":   data.User{},
 		},
-		expectedHTML: `<h1 class="mt-5">Plans</h1>`,
-	},
-	{
-		name:               "plans (not logged in)",
-		url:                "/plans",
-		method:             "GET",
-		expectedStatusCode: http.StatusTemporaryRedirect,
-		handler:            testApp.ChooseSubscription,
-	},
-	{
-		name:               "subscribe (not logged in)",
-		url:                "/subscribe",
-		method:             "GET",
-		expectedStatusCode: http.StatusTemporaryRedirect,
-		handler:            testApp.SubscribeToPlan,
 	},
 }
 
@@ -133,5 +97,29 @@ func TestConfig_PostLoginPage(t *testing.T) {
 
 	if !testApp.Session.Exists(ctx, "userID") {
 		t.Error("did not find userID in session")
+	}
+}
+
+func TestConfig_SubscribeToPlan(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/subscribe?id=1", nil)
+	ctx := getCtx(req)
+	req = req.WithContext(ctx)
+
+	testApp.Session.Put(ctx, "user", data.User{
+		ID:        1,
+		Email:     "admin@example.com",
+		FirstName: "Admin",
+		LastName:  "User",
+		Active:    1,
+	})
+
+	handler := http.HandlerFunc(testApp.SubcribeToPlan)
+	handler.ServeHTTP(rr, req)
+
+	testApp.Wait.Wait()
+
+	if rr.Code != http.StatusSeeOther {
+		t.Errorf("expected status code of statusseeother, but got %d", rr.Code)
 	}
 }

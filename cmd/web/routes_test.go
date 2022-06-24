@@ -18,7 +18,7 @@ var routes = []string{
 }
 
 func Test_Routes_Exist(t *testing.T) {
-	testRoutes := testApp.Routes()
+	testRoutes := testApp.routes()
 
 	chiRoutes := testRoutes.(chi.Router)
 

@@ -82,7 +82,7 @@ func (app *Config) serve() {
 	// start http server
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
-		Handler: app.Routes(),
+		Handler: app.routes(),
 	}
 
 	app.InfoLog.Println("Starting web server...")
