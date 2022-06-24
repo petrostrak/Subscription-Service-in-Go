@@ -1,16 +1,18 @@
 package main
 
 import (
-	"final-project/data"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/petrostrak/Subscription-Service-in-Go/data"
 )
 
 var pageTests = []struct {
 	name               string
 	url                string
+	method             string
 	expectedStatusCode int
 	handler            http.HandlerFunc
 	sessionData        map[string]any
@@ -19,25 +21,60 @@ var pageTests = []struct {
 	{
 		name:               "home",
 		url:                "/",
+		method:             "GET",
 		expectedStatusCode: http.StatusOK,
 		handler:            testApp.HomePage,
 	},
 	{
-		name:               "login page",
+		name:               "login",
 		url:                "/login",
-		expectedStatusCode: http.StatusSeeOther,
+		method:             "GET",
+		expectedStatusCode: http.StatusOK,
 		handler:            testApp.LoginPage,
-		expectedHTML:       `<h1 class="mt-5">Login</h1>`,
+	},
+	{
+		name:               "post login",
+		url:                "/login",
+		method:             "POST",
+		expectedStatusCode: http.StatusSeeOther,
+		handler:            testApp.PostLoginPage,
 	},
 	{
 		name:               "logout",
 		url:                "/logout",
-		expectedStatusCode: http.StatusOK,
-		handler:            testApp.LoginPage,
+		method:             "GET",
+		expectedStatusCode: http.StatusSeeOther,
+		handler:            testApp.Logout,
 		sessionData: map[string]any{
 			"userID": 1,
 			"user":   data.User{},
 		},
+	},
+	{
+		name:               "plans (logged in)",
+		url:                "/plans",
+		method:             "GET",
+		expectedStatusCode: http.StatusOK,
+		handler:            testApp.ChooseSubscription,
+		sessionData: map[string]any{
+			"userID": 1,
+			"user":   data.User{},
+		},
+		expectedHTML: `<h1 class="mt-5">Plans</h1>`,
+	},
+	{
+		name:               "plans (not logged in)",
+		url:                "/plans",
+		method:             "GET",
+		expectedStatusCode: http.StatusTemporaryRedirect,
+		handler:            testApp.ChooseSubscription,
+	},
+	{
+		name:               "subscribe (not logged in)",
+		url:                "/subscribe",
+		method:             "GET",
+		expectedStatusCode: http.StatusTemporaryRedirect,
+		handler:            testApp.SubscribeToPlan,
 	},
 }
 
