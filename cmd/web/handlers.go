@@ -275,7 +275,7 @@ func (app *Config) generateManual(u data.User, plan *data.Plan) *gofpdf.Fpdf {
 
 	importer := gofpdi.NewImporter()
 
-	t := importer.ImportPage(pdf, "./pdf/manual.pdf", 1, "/MediaBox")
+	t := importer.ImportPage(pdf, fmt.Sprintf("%s/manual.pdf", pathToManual), 1, "/MediaBox")
 	pdf.AddPage()
 
 	importer.UseImportedTemplate(pdf, t, 0, 0, 215.9, 0)
