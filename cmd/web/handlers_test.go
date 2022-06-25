@@ -43,6 +43,23 @@ var pageTests = []struct {
 	},
 }
 
+func TestConfig_Home(t *testing.T) {
+	pathToTemplates = "./templates"
+
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/", nil)
+
+	ctx := getCtx(req)
+	req = req.WithContext(ctx)
+
+	handler := http.HandlerFunc(testApp.HomePage)
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Error("failed; expected 200. but got ", rr.Code)
+	}
+}
+
 func Test_Pages(t *testing.T) {
 	pathToTemplates = "./templates"
 
